@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SignUpView: View {
 
-    @State private var phoneNumber: String = ""
+    @State private var email: String = ""
     @State private var password: String = ""
     @State private var name: String = ""
     @State private var surname: String = ""
@@ -17,7 +17,7 @@ struct SignUpView: View {
             VStack(spacing: 0){
                 SignUpLogoView()
 
-                SignUpFieldsView(phoneNumber: $phoneNumber, password: $password, name: $name, surname: $surname)
+                SignUpFieldsView(email: $email, password: $password, name: $name, surname: $surname)
 
                 if let err = errorText {
                     Text(err)
@@ -93,7 +93,7 @@ func SignUpLogoView() -> some View {
 }
 
 @ViewBuilder
-func SignUpFieldsView(phoneNumber: Binding<String>, password: Binding<String>, name: Binding<String>, surname: Binding<String>) -> some View {
+func SignUpFieldsView(email: Binding<String>, password: Binding<String>, name: Binding<String>, surname: Binding<String>) -> some View {
     VStack(spacing: 14){
 
         FieldTitleView_SignUp("İsim")
@@ -150,17 +150,17 @@ func SignUpFieldsView(phoneNumber: Binding<String>, password: Binding<String>, n
         )
         .shadow(color: .black.opacity(0.12), radius: 14, x: 0, y: 10)
 
-        FieldTitleView_SignUp("Telefon Numarası")
+        FieldTitleView_SignUp("Email")
 
         HStack(spacing: 10){
-            Image(systemName: "iphone.gen2")
+            Image(systemName: "envelope.fill")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.black.opacity(0.45))
                 .frame(width: 28)
 
-            TextField("Telefon Numarası", text: phoneNumber)
-                .keyboardType(.phonePad)
-                .textContentType(.telephoneNumber)
+            TextField("Email", text: email)
+                .keyboardType(.emailAddress)
+                .textContentType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
         }
@@ -286,10 +286,15 @@ func SignUpBtnView(isLoading: Bool, onTap: @escaping () async -> Void ) -> some 
 }
 
 extension SignUpView {
+    private func isValidEmail(_ value: String) -> Bool {
+        let pattern = #"^[^\s@]+@[^\s@]+\.[^\s@]+$"#
+        return value.range(of: pattern, options: .regularExpression) != nil
+    }
+
     private func resetForm(){
         name = ""
         surname = ""
-        phoneNumber = ""
+        email = ""
         password = ""
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 
@@ -298,12 +303,17 @@ extension SignUpView {
         errorText = nil
         successText = nil
 
-        let phone = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let s = surname.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !n.isEmpty, !s.isEmpty, !phone.isEmpty, !password.isEmpty else {
+        guard !n.isEmpty, !s.isEmpty, !cleanEmail.isEmpty, !password.isEmpty else {
             errorText = "Tüm alanlar zorunludur."
+            return
+        }
+
+        guard isValidEmail(cleanEmail) else {
+            errorText = "Geçerli bir email adresi girin."
             return
         }
 
@@ -314,7 +324,7 @@ extension SignUpView {
             _ = try await AuthAPI.shared.signup(
                 name: n,
                 surname: s,
-                phone: phone,
+                email: cleanEmail,
                 password: password
             )
             successText = "Kayıt başarılı. Şimdi giriş yapabilirsiniz."

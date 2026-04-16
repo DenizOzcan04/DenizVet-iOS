@@ -5,7 +5,7 @@ struct AccountDetailsView: View {
     
     @State private var name: String
     @State private var surname: String
-    @State private var phone: String
+    @State private var email: String
     
     @State private var isSaving = false
     @State private var errorMessage: String?
@@ -15,7 +15,7 @@ struct AccountDetailsView: View {
         self.user = user
         _name = State(initialValue: user.name)
         _surname = State(initialValue: user.surname)
-        _phone = State(initialValue: user.phone)
+        _email = State(initialValue: user.email ?? "")
     }
     
     var body: some View {
@@ -40,7 +40,7 @@ struct AccountDetailsView: View {
                             Text("\(name) \(surname)")
                                 .font(.system(size: 20, weight: .semibold))
                             
-                            Text(phone)
+                            Text(email)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
@@ -48,7 +48,7 @@ struct AccountDetailsView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             infoRow(label: "Ad", text: $name, icon: "person.fill")
                             infoRow(label: "Soyad", text: $surname, icon: "person.fill")
-                            infoRow(label: "Telefon Numarası", text: $phone, icon: "phone.fill", keyboard: .phonePad)
+                            infoRow(label: "Email", text: $email, icon: "envelope.fill", keyboard: .emailAddress)
                         }
                         
                         if let errorMessage {
@@ -141,12 +141,17 @@ struct AccountDetailsView: View {
         
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedSurname = surname.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedPhone = phone.trimmingCharacters(in: .whitespacesAndNewlines)
-        
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
         guard !trimmedName.isEmpty,
               !trimmedSurname.isEmpty,
-              !trimmedPhone.isEmpty else {
+              !trimmedEmail.isEmpty else {
             errorMessage = "Tüm alanlar zorunludur."
+            return
+        }
+
+        guard trimmedEmail.range(of: #"^[^\s@]+@[^\s@]+\.[^\s@]+$"#, options: .regularExpression) != nil else {
+            errorMessage = "Geçerli bir email adresi girin."
             return
         }
         
@@ -157,12 +162,12 @@ struct AccountDetailsView: View {
             let updatedUser = try await ProfileAPI.shared.updateProfile(
                 name: trimmedName,
                 surname: trimmedSurname,
-                phone: trimmedPhone
+                email: trimmedEmail
             )
 
             name = updatedUser.name
             surname = updatedUser.surname
-            phone = updatedUser.phone
+            email = updatedUser.email ?? trimmedEmail
             
             successMessage = "Profiliniz başarıyla güncellendi."
         } catch {
@@ -180,7 +185,7 @@ struct AccountDetailsView: View {
 #Preview {
     NavigationStack {
         AccountDetailsView(
-            user: UserDTO(id: "1", name: "Deniz", surname: "Özcan", phone: "5551112233", username: nil, role: "user", clinic: nil)
+            user: UserDTO(id: "1", name: "Deniz", surname: "Özcan", email: "deniz@example.com", username: nil, role: "user", clinic: nil)
         )
     }
 }

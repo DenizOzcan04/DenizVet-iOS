@@ -12,7 +12,7 @@ final class ProfileViewModel: ObservableObject {
     @AppStorage("accountRole") private var accountRole: String = "user"
     @AppStorage("persistSession") private var persistSession: Bool = false
     @AppStorage("rememberUserSession") private var rememberUserSession: Bool = false
-    @AppStorage("rememberedUserPhone") private var rememberedUserPhone: String = ""
+    @AppStorage("rememberedUserEmail") private var rememberedUserEmail: String = ""
 
     func loadProfile() async {
         isLoading = true
@@ -35,7 +35,7 @@ final class ProfileViewModel: ObservableObject {
         accountRole = "user"
         persistSession = false
         rememberUserSession = false
-        rememberedUserPhone = ""
+        rememberedUserEmail = ""
         UserDefaults.standard.removeObject(forKey: "currentUser")
 
         NotificationCenter.default.post(name: .didLogout, object: nil)

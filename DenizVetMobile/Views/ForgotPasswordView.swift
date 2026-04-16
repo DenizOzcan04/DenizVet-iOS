@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ForgotPasswordView: View {
     
-    @State private var phoneNumber: String = ""
+    @State private var email: String = ""
     var body: some View {
         ZStack{
             BackgroundForgotPasswordView()
             
             VStack(spacing: 56){
                 
-                Text("Telefonunuza gelen tek kullanımlık şifre ile giriş yapabilirsiniz.")
+                Text("Email adresinize gönderilecek sıfırlama bağlantısı ile şifrenizi yenileyebilirsiniz.")
                     .foregroundStyle(Color.white)
                     .font(.system(size: 20, weight: .semibold))
                     .multilineTextAlignment(.center)
@@ -24,9 +24,11 @@ struct ForgotPasswordView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 60)
          
-                TextField("Telefon numarası", text: $phoneNumber)
-                    .keyboardType(.phonePad)
-                    .textContentType(.telephoneNumber)
+                TextField("Email adresi", text: $email)
+                    .keyboardType(.emailAddress)
+                    .textContentType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
                     .padding(.horizontal, 100)
                     .frame(height: 52)
                     .frame(maxWidth: 350)

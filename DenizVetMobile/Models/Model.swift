@@ -1,14 +1,14 @@
 import Foundation
 
 struct LoginRequest: Encodable {
-    let phone: String
+    let email: String
     let password: String
 }
 
 struct SignupRequest: Encodable {
     let name: String
     let surname: String
-    let phone: String
+    let email: String
     let password: String
 }
 
@@ -16,7 +16,7 @@ struct UserDTO: Decodable {
     let id: String
     let name: String
     let surname: String
-    let phone: String
+    let email: String?
     let username: String?
     let role: String?
     let clinic: String?
@@ -40,7 +40,7 @@ struct APIMessage: Decodable, Error {
 struct UpdateProfileRequest: Encodable {
     let name: String
     let surname: String
-    let phone: String
+    let email: String
 }
 
 struct UpdateProfileResponse: Decodable {

@@ -42,7 +42,7 @@ struct ProfileAPI {
         return try JSONDecoder().decode(UserDTO.self, from: data)
     }
     
-    func updateProfile(name: String, surname: String, phone: String) async throws -> UserDTO {
+    func updateProfile(name: String, surname: String, email: String) async throws -> UserDTO {
         guard let token = UserDefaults.standard.string(forKey: "authToken") else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -52,7 +52,7 @@ struct ProfileAPI {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        let body = UpdateProfileRequest(name: name, surname: surname, phone: phone)
+        let body = UpdateProfileRequest(name: name, surname: surname, email: email)
         request.httpBody = try JSONEncoder().encode(body)
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -77,6 +77,5 @@ struct ProfileAPI {
         return responseObj.user
     }
 }
-
 
 

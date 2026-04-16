@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
 
-    @State private var phoneNumber: String = ""
+    @State private var email: String = ""
     @State private var password: String = ""
     @State private var isLoading = false
     @State private var errorText : String?
@@ -17,7 +17,7 @@ struct LoginView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
     @AppStorage("accountRole") private var accountRole: String = "user"
     @AppStorage("rememberUserSession") private var rememberUserSession: Bool = false
-    @AppStorage("rememberedUserPhone") private var rememberedUserPhone: String = ""
+    @AppStorage("rememberedUserEmail") private var rememberedUserEmail: String = ""
     @AppStorage("persistSession") private var persistSession: Bool = false
 
     var body: some View {
@@ -27,7 +27,7 @@ struct LoginView: View {
             VStack(spacing: 0){
                 LogoView()
 
-                FieldsView(phoneNumber: $phoneNumber, password: $password)
+                FieldsView(email: $email, password: $password)
 
                 if let err = errorText {
                     Text(err)
@@ -49,8 +49,8 @@ struct LoginView: View {
             }
         }
         .onAppear {
-            if rememberUserSession, !rememberedUserPhone.isEmpty {
-                phoneNumber = rememberedUserPhone
+            if rememberUserSession, !rememberedUserEmail.isEmpty {
+                email = rememberedUserEmail
             }
         }
     }
@@ -108,20 +108,20 @@ func LogoView() -> some View {
     
 
 @ViewBuilder
-func FieldsView(phoneNumber: Binding<String>, password: Binding<String>) -> some View {
+func FieldsView(email: Binding<String>, password: Binding<String>) -> some View {
     VStack(spacing: 14){
 
-        FieldTitleView("Telefon Numarası")
+        FieldTitleView("Email")
 
         HStack(spacing: 10){
-            Image(systemName: "iphone.gen2")
+            Image(systemName: "envelope.fill")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.black.opacity(0.45))
                 .frame(width: 28)
 
-            TextField("Telefon Numarası", text: phoneNumber)
-                .keyboardType(.phonePad)
-                .textContentType(.telephoneNumber)
+            TextField("Email", text: email)
+                .keyboardType(.emailAddress)
+                .textContentType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
         }
@@ -276,17 +276,26 @@ func LoginButtonView(isLoading: Bool, onTap: @escaping () async -> Void ) -> som
 }
 
 extension LoginView {
+    private func isValidEmail(_ value: String) -> Bool {
+        let pattern = #"^[^\s@]+@[^\s@]+\.[^\s@]+$"#
+        return value.range(of: pattern, options: .regularExpression) != nil
+    }
+
     func handleLogin() async {
-        let phone = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !phone.isEmpty, !password.isEmpty else {
-            errorText = "Telefon ve şifre gerekli."
+        let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !cleanEmail.isEmpty, !password.isEmpty else {
+            errorText = "Email ve şifre gerekli."
+            return
+        }
+        guard isValidEmail(cleanEmail) else {
+            errorText = "Geçerli bir email adresi girin."
             return
         }
         isLoading = true
         defer { isLoading = false }
 
         do {
-            let resp = try await AuthAPI.shared.login(phone: phone, password: password)
+            let resp = try await AuthAPI.shared.login(email: cleanEmail, password: password)
 
             authToken = resp.token
             UserDefaults.standard.set(resp.token, forKey: "authToken")
@@ -294,9 +303,9 @@ extension LoginView {
             persistSession = rememberUserSession
 
             if rememberUserSession {
-                rememberedUserPhone = phone
+                rememberedUserEmail = cleanEmail
             } else {
-                rememberedUserPhone = ""
+                rememberedUserEmail = ""
             }
 
             isLoggedIn = true
