@@ -9,6 +9,10 @@ final class ProfileViewModel: ObservableObject {
 
     @AppStorage("authToken") private var authToken: String = ""
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("accountRole") private var accountRole: String = "user"
+    @AppStorage("persistSession") private var persistSession: Bool = false
+    @AppStorage("rememberUserSession") private var rememberUserSession: Bool = false
+    @AppStorage("rememberedUserPhone") private var rememberedUserPhone: String = ""
 
     func loadProfile() async {
         isLoading = true
@@ -28,6 +32,10 @@ final class ProfileViewModel: ObservableObject {
     func logout() {
         authToken = ""
         isLoggedIn = false
+        accountRole = "user"
+        persistSession = false
+        rememberUserSession = false
+        rememberedUserPhone = ""
         UserDefaults.standard.removeObject(forKey: "currentUser")
 
         NotificationCenter.default.post(name: .didLogout, object: nil)

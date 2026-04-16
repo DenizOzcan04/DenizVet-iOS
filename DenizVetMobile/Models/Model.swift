@@ -17,13 +17,20 @@ struct UserDTO: Decodable {
     let name: String
     let surname: String
     let phone: String
+    let username: String?
     let role: String?
+    let clinic: String?
 }
 
 struct LoginResponse: Decodable {
     let message: String
     let token: String
     let user: UserDTO
+}
+
+struct VetLoginRequest: Encodable {
+    let username: String
+    let password: String
 }
 
 struct APIMessage: Decodable, Error {

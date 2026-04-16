@@ -15,6 +15,10 @@ struct LoginView: View {
     @State private var errorText : String?
     @AppStorage("authToken") private var authToken: String = ""
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("accountRole") private var accountRole: String = "user"
+    @AppStorage("rememberUserSession") private var rememberUserSession: Bool = false
+    @AppStorage("rememberedUserPhone") private var rememberedUserPhone: String = ""
+    @AppStorage("persistSession") private var persistSession: Bool = false
 
     var body: some View {
         ZStack{
@@ -31,14 +35,22 @@ struct LoginView: View {
                         .font(.system(size: 13, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 28)
-                        .padding(.top, 6)
+                        .padding(.top, 8)
                 }
 
-                ForgotBtnView()
+                UserLoginOptionsRow(rememberMe: $rememberUserSession)
+                    .padding(.top, 18)
 
                 LoginButtonView(isLoading: isLoading) { await handleLogin() }
+                    .padding(.top, 24)
 
                 LoginBtnView()
+                VetLoginLinkView()
+            }
+        }
+        .onAppear {
+            if rememberUserSession, !rememberedUserPhone.isEmpty {
+                phoneNumber = rememberedUserPhone
             }
         }
     }
@@ -194,17 +206,35 @@ private struct PasswordFieldRow: View {
 }
 
 @ViewBuilder
-func ForgotBtnView() -> some View {
-    NavigationLink {
-      ForgotPasswordView()
-    } label: {
-        Text("Şifrenizi mi unuttunuz ?")
-            .foregroundStyle(.white.opacity(0.9))
-            .font(GilroyFont(isBold: true, size: 15))
-            .underline()
-            .padding(.top, 14)
-            .padding(.bottom, 22)
+func UserLoginOptionsRow(rememberMe: Binding<Bool>) -> some View {
+    HStack {
+        Button {
+            rememberMe.wrappedValue.toggle()
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: rememberMe.wrappedValue ? "checkmark.square.fill" : "square")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+
+                Text("Beni Hatırla")
+                    .foregroundStyle(.white.opacity(0.92))
+                    .font(.system(size: 14, weight: .semibold))
+            }
+        }
+        .buttonStyle(.plain)
+
+        Spacer()
+
+        NavigationLink {
+            ForgotPasswordView()
+        } label: {
+            Text("Şifremi Unuttum")
+                .foregroundStyle(.white.opacity(0.92))
+                .font(.system(size: 14, weight: .semibold))
+                .underline()
+        }
     }
+    .frame(width: 340)
 }
 
 @ViewBuilder
@@ -260,6 +290,14 @@ extension LoginView {
 
             authToken = resp.token
             UserDefaults.standard.set(resp.token, forKey: "authToken")
+            accountRole = resp.user.role ?? "user"
+            persistSession = rememberUserSession
+
+            if rememberUserSession {
+                rememberedUserPhone = phone
+            } else {
+                rememberedUserPhone = ""
+            }
 
             isLoggedIn = true
 
@@ -289,7 +327,26 @@ func LoginBtnView() -> some View {
         }
     }
     .padding(.top, 18)
-    .padding(.bottom, 30)
+    .padding(.bottom, 12)
+}
+
+@ViewBuilder
+func VetLoginLinkView() -> some View {
+    NavigationLink {
+        VetLoginView()
+    } label: {
+        HStack(spacing: 8) {
+            Image(systemName: "cross.case.fill")
+                .foregroundStyle(.white.opacity(0.95))
+
+            Text("Veteriner Klinik Girişi")
+                .foregroundStyle(.white)
+                .font(GilroyFont(isBold: true, size: 15))
+                .underline()
+        }
+        .padding(.top, 8)
+        .padding(.bottom, 30)
+    }
 }
 
 #Preview {

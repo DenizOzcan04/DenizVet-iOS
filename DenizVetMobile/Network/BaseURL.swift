@@ -1,5 +1,5 @@
 import Foundation
 
 enum APIConfig {
-    static let baseURL = URL(string: "https://denizvet-ios-app-backend.onrender.com")!
+    static let baseURL = URL(string: "http://localhost:5050")!
 }

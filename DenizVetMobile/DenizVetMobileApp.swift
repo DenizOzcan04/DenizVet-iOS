@@ -10,6 +10,9 @@ import SwiftUI
 @main
 struct DenizVetMobileApp: App {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("accountRole") private var accountRole: String = "user"
+    @AppStorage("authToken") private var authToken: String = ""
+    @AppStorage("persistSession") private var persistSession: Bool = false
     init() {
             let appearance = UITabBarAppearance()
             appearance.configureWithOpaqueBackground()
@@ -23,10 +26,26 @@ struct DenizVetMobileApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                if isLoggedIn {
-                    MainTabView()
+                if isLoggedIn && !authToken.isEmpty {
+                    if accountRole == "vet" {
+                        VetClinicPlaceholderView()
+                    } else {
+                        MainTabView()
+                    }
                 } else {
                     LoginView()
+                }
+            }
+            .onAppear {
+                if !persistSession {
+                    isLoggedIn = false
+                    authToken = ""
+                    accountRole = "user"
+                    UserDefaults.standard.removeObject(forKey: "authToken")
+                    UserDefaults.standard.removeObject(forKey: "currentUser")
+                } else if authToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    isLoggedIn = false
+                    accountRole = "user"
                 }
             }
         }

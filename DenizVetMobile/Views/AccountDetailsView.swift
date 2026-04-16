@@ -180,7 +180,7 @@ struct AccountDetailsView: View {
 #Preview {
     NavigationStack {
         AccountDetailsView(
-            user: UserDTO(id: "1", name: "Deniz", surname: "Özcan", phone: "5551112233", role: "user")
+            user: UserDTO(id: "1", name: "Deniz", surname: "Özcan", phone: "5551112233", username: nil, role: "user", clinic: nil)
         )
     }
 }

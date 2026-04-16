@@ -42,9 +42,12 @@ final class AuthAPI {
         try await post("/api/auth/login", body: LoginRequest(phone: phone, password: password))
     }
 
+    func vetLogin(username: String, password: String) async throws -> LoginResponse {
+        try await post("/api/auth/vet/login", body: VetLoginRequest(username: username, password: password))
+    }
+
 
     func signup(name: String, surname: String, phone: String, password: String) async throws -> APIMessage {
         try await post("/api/auth/signup", body: SignupRequest(name: name, surname: surname, phone: phone, password: password))
     }
 }
-
