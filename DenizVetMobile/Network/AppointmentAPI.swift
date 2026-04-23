@@ -88,6 +88,35 @@ final class AppointmentAPI {
         }
     }
 
+    func fetchClinicAppointments(token: String) async throws -> [ClinicAppointmentDTO] {
+        let url = baseURL.appendingPathComponent("/api/appointments/clinic")
+
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.cachePolicy = .reloadIgnoringLocalCacheData
+        urlRequest.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+        urlRequest.setValue("no-cache", forHTTPHeaderField: "Pragma")
+
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoder = JSONDecoder()
+
+        if (200..<300).contains(httpResponse.statusCode) {
+            return try decoder.decode([ClinicAppointmentDTO].self, from: data)
+        } else if let msg = try? decoder.decode(APIMessage.self, from: data) {
+            throw HTTPError.badStatus(httpResponse.statusCode, msg.message)
+        } else {
+            let serverMessage = String(data: data, encoding: .utf8) ?? "Bilinmeyen hata"
+            throw HTTPError.badStatus(httpResponse.statusCode, serverMessage)
+        }
+    }
+
     func deleteAppointment(id: String, token: String) async throws {
         var req = URLRequest(url: API.base.appendingPathComponent("/api/appointments/\(id)"))
         req.httpMethod = "DELETE"

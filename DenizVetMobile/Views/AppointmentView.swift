@@ -155,6 +155,15 @@ struct AppointmentView: View {
                             )
                         }
                         .padding()
+                        .disabled(clinicsVM.clinics.count <= 1)
+                        .opacity(clinicsVM.clinics.isEmpty ? 0.7 : 1)
+
+                        if clinicsVM.clinics.count == 1 {
+                            Text("Şu an randevu oluşturabileceğiniz tek aktif klinik otomatik seçildi.")
+                                .font(GilroyFont(isBold: false, size: 13))
+                                .foregroundStyle(Color.black.opacity(0.58))
+                                .padding(.horizontal)
+                        }
 
                         // tarih
                         Text("Tarih")
@@ -289,6 +298,7 @@ struct AppointmentView: View {
         }
         .task {
             await clinicsVM.loadClinics()
+            applyDefaultClinicSelection()
         }
     }
 
@@ -301,6 +311,13 @@ struct AppointmentView: View {
         date = .now
         selectedTime = "09:00" 
         notes = ""
+        applyDefaultClinicSelection()
+    }
+
+    private func applyDefaultClinicSelection() {
+        guard clinicsVM.clinics.count == 1, let firstClinic = clinicsVM.clinics.first else { return }
+        clinicSelection = firstClinic.name
+        selectedClinicId = firstClinic.id
     }
 
     private func handleAppointmentButton() {

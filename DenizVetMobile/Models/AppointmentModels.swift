@@ -87,3 +87,48 @@ struct UserAppointmentDTO: Codable, Identifiable {
     }
 }
 
+struct AppointmentOwnerDTO: Codable {
+    let id: String
+    let name: String
+    let surname: String
+    let email: String?
+    let phone: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case name
+        case surname
+        case email
+        case phone
+    }
+
+    var fullName: String {
+        "\(name) \(surname)".trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+struct ClinicAppointmentDTO: Codable, Identifiable {
+    let id: String
+    let petType: String
+    let petName: String
+    let serviceType: String
+    let date: String
+    let time: String
+    let notes: String?
+    let status: String
+    let clinic: ClinicSummaryDTO?
+    let user: AppointmentOwnerDTO?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case petType
+        case petName
+        case serviceType
+        case date
+        case time
+        case notes
+        case status
+        case clinic
+        case user
+    }
+}

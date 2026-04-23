@@ -28,7 +28,7 @@ struct DenizVetMobileApp: App {
             NavigationStack {
                 if isLoggedIn && !authToken.isEmpty {
                     if accountRole == "vet" {
-                        VetClinicPlaceholderView()
+                        VetClinicTabView()
                     } else {
                         MainTabView()
                     }
